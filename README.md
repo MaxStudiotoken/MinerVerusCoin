@@ -42,7 +42,7 @@ En la app configura la wallet, pool, nombre del worker, URL HTTPS de Farm API y 
 
 ## Fuente nativa
 
-El port usa como referencia el submodulo oficial `nheqminer`, fijado a un commit concreto y bajo licencia MIT. Al clonar el proyecto en otra maquina usa:
+El port usa como referencia el submodulo oficial `nheqminer`, fijado a un commit concreto. Su licencia superior es MIT, pero algunos ficheros de criptografia conservan avisos MIT y Apache-2.0 propios que se respetaran en cualquier port. Al clonar el proyecto en otra maquina usa:
 
 ```powershell
 git clone --recurse-submodules https://github.com/MaxStudiotoken/MinerVerusCoin.git
@@ -50,7 +50,7 @@ git clone --recurse-submodules https://github.com/MaxStudiotoken/MinerVerusCoin.
 
 Todavia no se compila directamente dentro del APK: el CMake de escritorio fuerza AVX/x86 y dependencias Boost. La integracion Android usara un conjunto reducido de sus fuentes portables con validacion de vectores de hash en ARM antes de habilitar la mineria real.
 
-El resultado de la auditoria y la ruta de portabilidad estan en `docs/PORTING_NATIVE_ENGINE.md`.
+El resultado de la auditoria y la ruta de portabilidad estan en `docs/PORTING_NATIVE_ENGINE.md`. Los avisos de licencia y procedencia estan en `docs/THIRD_PARTY_NOTICES.md`.
 
 ## Alcance actual
 
