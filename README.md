@@ -50,6 +50,8 @@ git clone --recurse-submodules https://github.com/MaxStudiotoken/MinerVerusCoin.
 
 Todavia no se compila directamente dentro del APK: el CMake de escritorio fuerza AVX/x86 y dependencias Boost. La integracion Android usara un conjunto reducido de sus fuentes portables con validacion de vectores de hash en ARM antes de habilitar la mineria real.
 
+El resultado de la auditoria y la ruta de portabilidad estan en `docs/PORTING_NATIVE_ENGINE.md`.
+
 ## Alcance actual
 
 La aplicacion representa una sesion de minado y la monitoriza. Incluye un puente JNI compilado con Android NDK para `arm64-v8a`, preparado para portar el nucleo VerusHash portable.
