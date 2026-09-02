@@ -319,7 +319,7 @@ private fun ConfigurationCard(
         )
 
         Text(
-            text = uiState.farmSyncLabel,
+            text = "${uiState.farmSyncLabel}. La clave no se guarda en el dispositivo.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp
         )

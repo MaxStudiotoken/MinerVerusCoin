@@ -1,6 +1,8 @@
 package vargas.maximo.minerveruscoin
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.SharedPreferences
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -46,13 +48,18 @@ data class MinerUiState(
     val logs: List<String> = emptyList()
 )
 
-class MinerViewModel(
+class MinerViewModel @JvmOverloads constructor(
+    application: Application,
     private val marketRepository: MarketRepository = MarketRepository(),
     private val farmRepository: FarmRepository = FarmRepository()
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(MinerUiState())
     val uiState: StateFlow<MinerUiState> = _uiState.asStateFlow()
+    private val preferences: SharedPreferences = application.getSharedPreferences(
+        PREFERENCES_NAME,
+        Application.MODE_PRIVATE
+    )
 
     private var miningJob: Job? = null
     private var miningStartedAtMs = 0L
@@ -62,6 +69,7 @@ class MinerViewModel(
     private var lastFarmSyncAtMs = 0L
 
     init {
+        restoreConfiguration()
         addLog("Panel VRSC cargado.")
         addLog("Mercado en tiempo real disponible.")
         refreshData(showUserLog = false)
@@ -69,26 +77,29 @@ class MinerViewModel(
 
     fun updatePoolAddress(value: String) {
         _uiState.update { it.copy(poolAddress = value) }
+        preferences.edit().putString(PREF_POOL_ADDRESS, value).apply()
     }
 
     fun updateMinerAddress(value: String) {
         _uiState.update { it.copy(minerAddress = value) }
+        preferences.edit().putString(PREF_MINER_ADDRESS, value).apply()
     }
 
     fun updateWorkerName(value: String) {
-        _uiState.update {
-            it.copy(workerName = value.take(24))
-        }
+        val workerName = value.take(24)
+        _uiState.update { it.copy(workerName = workerName) }
+        preferences.edit().putString(PREF_WORKER_NAME, workerName).apply()
     }
 
     fun updateCpuLoad(value: Int) {
-        _uiState.update {
-            it.copy(cpuLoadPercent = value.coerceIn(MIN_CPU_LOAD, MAX_CPU_LOAD))
-        }
+        val cpuLoad = value.coerceIn(MIN_CPU_LOAD, MAX_CPU_LOAD)
+        _uiState.update { it.copy(cpuLoadPercent = cpuLoad) }
+        preferences.edit().putInt(PREF_CPU_LOAD, cpuLoad).apply()
     }
 
     fun updateFarmApiUrl(value: String) {
         _uiState.update { it.copy(farmApiUrl = value) }
+        preferences.edit().putString(PREF_FARM_API_URL, value).apply()
     }
 
     fun updateFarmApiKey(value: String) {
@@ -306,6 +317,21 @@ class MinerViewModel(
         }
     }
 
+    private fun restoreConfiguration() {
+        _uiState.update {
+            it.copy(
+                poolAddress = preferences.getString(PREF_POOL_ADDRESS, "").orEmpty(),
+                minerAddress = preferences.getString(PREF_MINER_ADDRESS, "").orEmpty(),
+                workerName = preferences.getString(PREF_WORKER_NAME, "vrsc-mobile-01")
+                    .orEmpty()
+                    .ifBlank { "vrsc-mobile-01" },
+                cpuLoadPercent = preferences.getInt(PREF_CPU_LOAD, 60)
+                    .coerceIn(MIN_CPU_LOAD, MAX_CPU_LOAD),
+                farmApiUrl = preferences.getString(PREF_FARM_API_URL, "").orEmpty()
+            )
+        }
+    }
+
     private fun syncFarmTelemetry(force: Boolean = false) {
         val snapshot = _uiState.value
         val apiUrl = snapshot.farmApiUrl.trim()
@@ -385,5 +411,11 @@ class MinerViewModel(
         const val MIN_CPU_LOAD = 25
         const val MAX_CPU_LOAD = 100
         const val FARM_SYNC_INTERVAL_MS = 15_000L
+        const val PREFERENCES_NAME = "verus_miner_preferences"
+        const val PREF_POOL_ADDRESS = "pool_address"
+        const val PREF_MINER_ADDRESS = "miner_address"
+        const val PREF_WORKER_NAME = "worker_name"
+        const val PREF_CPU_LOAD = "cpu_load"
+        const val PREF_FARM_API_URL = "farm_api_url"
     }
 }
