@@ -184,23 +184,7 @@ class MinerViewModel @JvmOverloads constructor(
         }
 
         val snapshot = _uiState.value
-        val wallet = snapshot.minerAddress.trim()
-        val pool = snapshot.poolAddress.trim()
         val worker = snapshot.workerName.ifBlank { "vrsc-mobile-01" }
-
-        when {
-            wallet.isBlank() -> {
-                _uiState.update { it.copy(statusLabel = "Falta la wallet VRSC") }
-                addLog("No se puede iniciar sin wallet.")
-                return
-            }
-
-            pool.isBlank() -> {
-                _uiState.update { it.copy(statusLabel = "Falta el pool") }
-                addLog("No se puede iniciar sin pool o stratum.")
-                return
-            }
-        }
 
         miningJob?.cancel()
         miningStartedAtMs = System.currentTimeMillis()
@@ -211,7 +195,7 @@ class MinerViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(
                 isMining = true,
-                statusLabel = "Conectando al pool",
+                statusLabel = "Iniciando demo local",
                 hashRate = 0.0,
                 averageHashRate = 0.0,
                 acceptedShares = 0,
@@ -222,18 +206,16 @@ class MinerViewModel @JvmOverloads constructor(
                 uptimeLabel = "00:00:00",
                 lastShareAt = "--:--:--",
                 marketError = null,
-                minerAddress = wallet,
-                poolAddress = pool,
                 workerName = worker
             )
         }
 
-        addLog("Conectando $worker a $pool")
+        addLog("Demo local preparada para $worker; no se conecta al pool.")
         syncFarmTelemetry(force = true)
 
         miningJob = viewModelScope.launch {
             delay(1200)
-            addLog("Sesion iniciada para ${wallet.take(10)}...")
+            addLog("Demo iniciada. No se envian hashes ni pagos reales.")
 
             while (true) {
                 delay(1000)
@@ -276,18 +258,18 @@ class MinerViewModel @JvmOverloads constructor(
             lastShareAt = nowClock()
             nextAcceptedShareAt = elapsedSeconds + shareInterval
             if (acceptedShares == 1 || acceptedShares % 4 == 0) {
-                addLog("Share aceptado #$acceptedShares")
+                addLog("Share simulada #$acceptedShares")
             }
         }
 
         if (elapsedSeconds % 37 == 0) {
             rejectedShares += 1
-            addLog("Share rechazado: el pool cambio la dificultad.")
+            addLog("Rechazo simulado por cambio de dificultad.")
         }
 
         if (elapsedSeconds % 120 == 0) {
             blocksFound += 1
-            addLog("Trabajo de bloque enviado correctamente.")
+            addLog("Hito de bloque simulado.")
         }
 
         val estimatedDailyReward = estimateDailyReward(
@@ -301,7 +283,7 @@ class MinerViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(
                 isMining = true,
-                statusLabel = "Minando ${snapshot.workerName}",
+                statusLabel = "Demo activa: ${snapshot.workerName}",
                 hashRate = currentHashRate,
                 averageHashRate = averageHashRate,
                 acceptedShares = acceptedShares,
@@ -326,11 +308,11 @@ class MinerViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(
                 isMining = false,
-                statusLabel = reason ?: "Sesion detenida",
+                statusLabel = reason ?: "Demo detenida",
                 hashRate = 0.0
             )
         }
-        addLog(reason ?: "Mineria detenida.")
+        addLog(reason ?: "Demo detenida.")
         syncFarmTelemetry(force = true)
     }
 

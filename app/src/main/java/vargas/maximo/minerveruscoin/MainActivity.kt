@@ -81,7 +81,6 @@ fun VerusCoinMinerApp(
     viewModel: MinerViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val canStartMining = uiState.poolAddress.isNotBlank() && uiState.minerAddress.isNotBlank()
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -105,7 +104,6 @@ fun VerusCoinMinerApp(
         item {
             ActionButtons(
                 uiState = uiState,
-                canStartMining = canStartMining,
                 onToggleMining = viewModel::toggleMining,
                 onRefresh = viewModel::refreshData
             )
@@ -191,7 +189,7 @@ private fun HeroCard(uiState: MinerUiState) {
                     HeroBadge(
                         modifier = Modifier.weight(1f),
                         label = "Estado",
-                        value = if (uiState.isMining) "Activo" else "Listo"
+                        value = if (uiState.isMining) "Demo activa" else "Demo lista"
                     )
                     HeroBadge(
                         modifier = Modifier.weight(1f),
@@ -254,7 +252,7 @@ private fun ConfigurationCard(
     DashboardCard {
         SectionHeader(
             title = "Configuracion del worker",
-            subtitle = "Ajusta el pool, tu wallet VRSC y la intensidad antes de iniciar."
+            subtitle = "Prepara los datos del motor real. La demo no se conecta al pool."
         )
 
         val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -364,7 +362,7 @@ private fun ConfigurationCard(
             )
 
             LinearProgressIndicator(
-                progress = uiState.cpuLoadPercent / 100f,
+                progress = { uiState.cpuLoadPercent / 100f },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
@@ -379,7 +377,6 @@ private fun ConfigurationCard(
 @Composable
 private fun ActionButtons(
     uiState: MinerUiState,
-    canStartMining: Boolean,
     onToggleMining: () -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -396,7 +393,6 @@ private fun ActionButtons(
             Button(
                 onClick = onToggleMining,
                 modifier = Modifier.weight(1f),
-                enabled = uiState.isMining || canStartMining,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (uiState.isMining) {
                         MaterialTheme.colorScheme.tertiary
@@ -408,7 +404,7 @@ private fun ActionButtons(
                 contentPadding = PaddingValues(vertical = 14.dp)
             ) {
                 Text(
-                    text = if (uiState.isMining) "Detener mineria" else "Iniciar mineria",
+                    text = if (uiState.isMining) "Detener demo" else "Iniciar demo segura",
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -426,9 +422,9 @@ private fun ActionButtons(
             }
         }
 
-        if (!uiState.isMining && !canStartMining) {
+        if (!uiState.isMining) {
             Text(
-                text = "Completa wallet y pool para habilitar el inicio del worker.",
+                text = "La demo no envia hashes, shares ni pagos al pool. El motor real aun esta en validacion ARM64.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
             )
@@ -440,8 +436,8 @@ private fun ActionButtons(
 private fun PerformanceCard(uiState: MinerUiState) {
     DashboardCard {
         SectionHeader(
-            title = "Sesion de minado",
-            subtitle = "Metricas en vivo del worker y del rendimiento estimado."
+            title = "Sesion de demostracion",
+            subtitle = "Metricas simuladas para probar el panel y las protecciones del dispositivo."
         )
 
         MetricRow(
@@ -449,15 +445,15 @@ private fun PerformanceCard(uiState: MinerUiState) {
             right = MetricSpec("Hash medio", formatHashRate(uiState.averageHashRate))
         )
         MetricRow(
-            left = MetricSpec("Shares OK", uiState.acceptedShares.toString()),
-            right = MetricSpec("Shares rechazados", uiState.rejectedShares.toString())
+            left = MetricSpec("Shares demo", uiState.acceptedShares.toString()),
+            right = MetricSpec("Rechazos demo", uiState.rejectedShares.toString())
         )
         MetricRow(
-            left = MetricSpec("Bloques", uiState.blocksFound.toString()),
+            left = MetricSpec("Hitos demo", uiState.blocksFound.toString()),
             right = MetricSpec("Uptime", uiState.uptimeLabel)
         )
         MetricRow(
-            left = MetricSpec("Ultima share", uiState.lastShareAt),
+            left = MetricSpec("Ultimo evento", uiState.lastShareAt),
             right = MetricSpec("Rendimiento", "${uiState.cpuLoadPercent}%")
         )
         MetricRow(
@@ -583,7 +579,7 @@ private fun ActivityCard(uiState: MinerUiState) {
     DashboardCard {
         SectionHeader(
             title = "Actividad reciente",
-            subtitle = "Ultimos eventos del worker y del mercado."
+            subtitle = "Eventos de la demo local, sincronizacion de granja y mercado."
         )
 
         if (uiState.logs.isEmpty()) {

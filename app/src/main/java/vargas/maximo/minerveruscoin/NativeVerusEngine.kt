@@ -9,7 +9,7 @@ object NativeVerusEngine {
     val status: String
         get() = loadResult.fold(
             onSuccess = { nativeEngineInfo() },
-            onFailure = { "Motor nativo no disponible en este dispositivo" }
+            onFailure = { "Puente NDK no disponible; la mineria real permanece desactivada" }
         )
 
     private external fun nativeEngineInfo(): String
