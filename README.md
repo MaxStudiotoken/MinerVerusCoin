@@ -41,4 +41,6 @@ En la app configura la wallet, pool, nombre del worker, URL HTTPS de Farm API y 
 
 ## Alcance actual
 
-La aplicacion representa una sesion de minado y la monitoriza. Un motor VRSC real requerira integrar VerusHash y un cliente Stratum nativo, con controles termicos, de bateria y consentimiento explicito del usuario.
+La aplicacion representa una sesion de minado y la monitoriza. Incluye un puente JNI compilado con Android NDK para `arm64-v8a`, preparado para portar el nucleo VerusHash portable.
+
+El motor VRSC real aun requiere validar vectores de hash en ARM y conectar un cliente Stratum, con controles termicos, de bateria y consentimiento explicito del usuario.

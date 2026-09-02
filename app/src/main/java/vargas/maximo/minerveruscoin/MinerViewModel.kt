@@ -44,6 +44,7 @@ data class MinerUiState(
     val farmApiUrl: String = "",
     val farmApiKey: String = "",
     val farmSyncLabel: String = "Farm API sin configurar",
+    val engineStatus: String = "Comprobando motor nativo",
     val priceData: PriceData? = null,
     val logs: List<String> = emptyList()
 )
@@ -70,6 +71,7 @@ class MinerViewModel @JvmOverloads constructor(
 
     init {
         restoreConfiguration()
+        _uiState.update { it.copy(engineStatus = NativeVerusEngine.status) }
         addLog("Panel VRSC cargado.")
         addLog("Mercado en tiempo real disponible.")
         refreshData(showUserLog = false)

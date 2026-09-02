@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "vargas.maximo.minerveruscoin"
     compileSdk = 34
+    ndkVersion = "30.0.16138531"
 
     defaultConfig {
         applicationId = "vargas.maximo.minerveruscoin"
@@ -41,6 +42,13 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.4"
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 }
 

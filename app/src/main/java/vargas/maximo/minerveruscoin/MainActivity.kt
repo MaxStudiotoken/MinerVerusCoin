@@ -324,6 +324,12 @@ private fun ConfigurationCard(
             fontSize = 12.sp
         )
 
+        Text(
+            text = uiState.engineStatus,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
+
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
