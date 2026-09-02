@@ -26,10 +26,10 @@ Tambien puede ejecutarse en un contenedor:
 
 ```powershell
 docker build -t verus-farm-api ./server
-docker run --env-file server/.env -p 8787:8787 verus-farm-api
+docker run --env-file server/.env -p 8787:8787 -v verus-farm-data:/data verus-farm-api
 ```
 
-En produccion publica el contenedor mediante un proxy o plataforma que termine TLS y entregue una URL `https://`.
+En produccion publica el contenedor mediante un proxy o plataforma que termine TLS y entregue una URL `https://`. El volumen `verus-farm-data` conserva workers y eventos entre reinicios.
 
 ### 2. Dashboard web
 

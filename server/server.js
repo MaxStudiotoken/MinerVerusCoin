@@ -16,6 +16,9 @@ if (fs.existsSync(envPath)) {
 const port = Number(process.env.PORT || 8787);
 const apiKey = process.env.FARM_API_KEY;
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "*";
+const dataFile = path.resolve(
+  process.env.FARM_DATA_FILE || path.join(__dirname, "data", "farm-state.json")
+);
 const workers = new Map();
 const events = [];
 
@@ -27,6 +30,39 @@ if (!apiKey) {
 function addEvent(message) {
   events.unshift({ message, timestamp: Date.now() });
   events.splice(20);
+}
+
+function restoreState() {
+  if (!fs.existsSync(dataFile)) {
+    return;
+  }
+
+  try {
+    const saved = JSON.parse(fs.readFileSync(dataFile, "utf8"));
+    for (const worker of saved.workers || []) {
+      if (worker && typeof worker.id === "string") {
+        workers.set(worker.id, worker);
+      }
+    }
+    events.push(...(saved.events || []).slice(0, 20));
+  } catch (error) {
+    console.error(`Could not restore farm state: ${error.message}`);
+  }
+}
+
+function persistState() {
+  try {
+    fs.mkdirSync(path.dirname(dataFile), { recursive: true });
+    const temporaryFile = `${dataFile}.tmp`;
+    fs.writeFileSync(
+      temporaryFile,
+      JSON.stringify({ workers: [...workers.values()], events }),
+      "utf8"
+    );
+    fs.renameSync(temporaryFile, dataFile);
+  } catch (error) {
+    console.error(`Could not persist farm state: ${error.message}`);
+  }
 }
 
 function send(response, statusCode, payload) {
@@ -134,6 +170,7 @@ const server = http.createServer(async (request, response) => {
       if (!previous || previous.active !== worker.active) {
         addEvent(`${worker.name}: ${worker.active ? "worker activo" : "worker detenido"}`);
       }
+      persistState();
       return send(response, 202, { accepted: true, receivedAt: worker.lastSeenAt });
     } catch (error) {
       return send(response, 400, { error: error.message });
@@ -146,4 +183,7 @@ const server = http.createServer(async (request, response) => {
 server.listen(port, () => {
   console.log(`Verus Farm API listening on http://localhost:${port}`);
   addEvent("Farm API started");
+  persistState();
 });
+
+restoreState();
