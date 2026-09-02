@@ -54,6 +54,6 @@ El resultado de la auditoria y la ruta de portabilidad estan en `docs/PORTING_NA
 
 ## Alcance actual
 
-La aplicacion representa una sesion de minado y la monitoriza. Incluye un puente JNI compilado con Android NDK para `arm64-v8a`, preparado para portar el nucleo VerusHash portable.
+La aplicacion y la web ofrecen una demostracion local de una sesion de minado para probar el panel, la proteccion termica y la telemetria. No se conectan a un pool ni producen shares, bloques o pagos. Incluyen un puente JNI compilado con Android NDK para `arm64-v8a`, preparado para portar el nucleo VerusHash portable.
 
 El motor VRSC real aun requiere validar vectores de hash en ARM y conectar un cliente Stratum, con controles termicos, de bateria y consentimiento explicito del usuario.

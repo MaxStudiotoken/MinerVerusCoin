@@ -9,13 +9,11 @@ const defaultState = {
   priceChange: null,
   logs: [
     { text: "Consola de granja iniciada en modo demo", time: "ahora" },
-    { text: "Pool VRSC listo para conectar", time: "hace 2 min" },
-    { text: "Esperando telemetria de la app Android", time: "hace 4 min" }
+    { text: "Los datos locales no se envian a un pool", time: "ahora" },
+    { text: "Esperando telemetria verificada de la Farm API", time: "ahora" }
   ],
   workers: [
-    { id: 1, name: "android-maxi", type: "Android app", active: true, hashrate: 5.8, shares: 12, rejected: 0, load: 60 },
-    { id: 2, name: "rig-casa-01", type: "Desktop rig", active: true, hashrate: 16.4, shares: 39, rejected: 1, load: 80 },
-    { id: 3, name: "rig-casa-02", type: "Desktop rig", active: false, hashrate: 0, shares: 0, rejected: 0, load: 0 }
+    { id: 1, name: "android-demo", type: "Datos simulados", active: false, hashrate: 0, shares: 0, rejected: 0, load: 0 }
   ]
 };
 
@@ -38,11 +36,11 @@ function renderWorkers() {
   $("#workers").innerHTML = state.workers.map((worker) => `
     <article class="worker" style="--worker-glow:${worker.active ? "#3165d4" : "#75859c"}">
       <div class="worker-top">
-        <div><div class="worker-name">${worker.name}</div><span class="status ${worker.active ? "" : "offline"}">${worker.active ? "EN LINEA" : "DETENIDO"}</span></div>
-        <button class="worker-toggle" data-worker="${worker.id}" ${apiBaseUrl ? "disabled" : ""}>${worker.active ? "DETENER" : "INICIAR"}</button>
+        <div><div class="worker-name">${worker.name}</div><span class="status ${worker.active ? "" : "offline"}">${worker.active ? "DEMO ACTIVA" : "DETENIDO"}</span></div>
+        <button class="worker-toggle" data-worker="${worker.id}" ${apiBaseUrl ? "disabled" : ""}>${worker.active ? "DETENER DEMO" : "INICIAR DEMO"}</button>
       </div>
       <div class="worker-stat"><div><strong>${formatHashrate(worker.hashrate)}</strong><span>hash rate actual</span></div><span>${worker.type}</span></div>
-      <div class="worker-footer"><span>${worker.shares} shares OK</span><span>${worker.rejected} rechazadas</span><span>${worker.load}% carga</span></div>
+      <div class="worker-footer"><span>${worker.shares} eventos demo</span><span>${worker.rejected} rechazados</span><span>${worker.load}% carga</span></div>
     </article>`).join("");
 
   document.querySelectorAll("[data-worker]").forEach((button) => {
@@ -118,7 +116,7 @@ function toggleWorker(id) {
   worker.active = !worker.active;
   worker.hashrate = worker.active ? Math.max(worker.hashrate, 4.2) : 0;
   worker.load = worker.active ? Math.max(worker.load, 60) : 0;
-  addLog(`${worker.name}: ${worker.active ? "worker iniciado" : "worker detenido"}`);
+  addLog(`${worker.name}: ${worker.active ? "demo iniciada" : "demo detenida"}`);
   persist();
   render();
 }
@@ -146,7 +144,7 @@ async function refreshMarket() {
 
 $("#start-all").addEventListener("click", () => {
   state.workers.forEach((worker) => { if (!worker.active) { worker.active = true; worker.hashrate = 4.2; worker.load = 55; } });
-  addLog("Todos los workers demo fueron activados");
+  addLog("Todos los workers demo fueron activados; no se enviaron hashes al pool");
   persist();
   render();
 });

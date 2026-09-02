@@ -27,10 +27,10 @@
         <div>
           <p class="eyebrow">CENTRO DE CONTROL</p>
           <h1>Tu granja VRSC,<br /><em>en una sola vista.</em></h1>
-          <p class="hero-copy">Supervisa workers, rendimiento y estimaciones. Conecta esta consola a la API de tu granja cuando este lista.</p>
+          <p class="hero-copy">Supervisa workers y telemetria. El modo local genera datos de demostracion; conecta una API verificada cuando tu granja este lista.</p>
         </div>
         <div class="hero-actions">
-          <button class="button button-primary" id="start-all">Activar workers</button>
+          <button class="button button-primary" id="start-all">Activar demo</button>
           <button class="button button-secondary" id="refresh-market">Actualizar mercado</button>
         </div>
       </section>
@@ -47,12 +47,12 @@
           <small id="price-change">Consultando mercado...</small>
         </article>
         <article class="metric-card">
-          <span>ESTIMACION DIARIA</span>
+          <span>ESTIMACION DEL PANEL</span>
           <strong id="daily-usd">$0.00</strong>
-          <small><span id="daily-vrsc">0.0000</span> VRSC / dia</small>
+          <small><span id="daily-vrsc">0.0000</span> VRSC / dia · no confirma pagos</small>
         </article>
         <article class="metric-card">
-          <span>SHARES ACEPTADOS</span>
+          <span>EVENTOS REPORTADOS</span>
           <strong id="total-shares">0</strong>
           <small id="rejected-shares">0 rechazadas</small>
         </article>
@@ -62,7 +62,7 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">WORKERS</p>
-            <h2>Granja conectada</h2>
+          <h2>Granja y demos locales</h2>
           </div>
           <button class="text-button" id="add-worker">+ Agregar worker demo</button>
         </div>
@@ -96,7 +96,7 @@
         <div>
           <p class="eyebrow">SIGUIENTE PASO</p>
           <h2>Conecta la granja real</h2>
-          <p>La web esta preparada para consumir <code>/api/farm/status</code>. La app Android y cada rig enviaran sus metricas a ese backend con una clave de equipo.</p>
+          <p>La web esta preparada para consumir <code>/api/farm/status</code>. La app Android actual envia solo telemetria de demostracion; un minero real debe verificarse antes de publicar recompensas.</p>
         </div>
         <span class="api-status">API pendiente</span>
       </section>
