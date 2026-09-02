@@ -7,6 +7,7 @@ Proyecto formado por una app Android y una consola web para supervisar workers V
 - `app/`: dashboard Android. Publica telemetria de su worker a la Farm API cuando se configura una URL HTTPS y una clave.
 - `docs/`: web estatica para GitHub Pages. Muestra la granja en modo demo o conectada a la API.
 - `server/`: Farm API Node.js. Recibe telemetria autenticada y expone un estado de solo lectura para la web.
+- `third_party/nheqminer`: submodulo fijado al minero oficial VerusHash `v0.8.2` para el port Android NDK.
 
 ## Puesta en marcha
 
@@ -38,6 +39,16 @@ Actualiza `docs/config.js` con la URL HTTPS de la API y sube el proyecto a GitHu
 ### 3. App Android
 
 En la app configura la wallet, pool, nombre del worker, URL HTTPS de Farm API y la misma clave privada. La app nunca envia wallet ni datos del pool a la Farm API.
+
+## Fuente nativa
+
+El port usa como referencia el submodulo oficial `nheqminer`, fijado a un commit concreto y bajo licencia MIT. Al clonar el proyecto en otra maquina usa:
+
+```powershell
+git clone --recurse-submodules https://github.com/MaxStudiotoken/MinerVerusCoin.git
+```
+
+Todavia no se compila directamente dentro del APK: el CMake de escritorio fuerza AVX/x86 y dependencias Boost. La integracion Android usara un conjunto reducido de sus fuentes portables con validacion de vectores de hash en ARM antes de habilitar la mineria real.
 
 ## Alcance actual
 

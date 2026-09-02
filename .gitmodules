@@ -1,0 +1,3 @@
+[submodule "third_party/nheqminer"]
+	path = third_party/nheqminer
+	url = https://github.com/VerusCoin/nheqminer.git
