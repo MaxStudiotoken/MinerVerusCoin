@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1220" />
+    <title>Verus Farm Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Verus Farm Console">
+          <span class="brand-mark">V</span>
+          <span>VERUS<span>/</span>FARM</span>
+        </a>
+        <div class="connection">
+          <span class="pulse"></span>
+          <span id="connection-label">Modo demo local</span>
+        </div>
+      </header>
+
+      <section class="hero" id="top">
+        <div>
+          <p class="eyebrow">CENTRO DE CONTROL</p>
+          <h1>Tu granja VRSC,<br /><em>en una sola vista.</em></h1>
+          <p class="hero-copy">Supervisa workers, rendimiento y estimaciones. Conecta esta consola a la API de tu granja cuando este lista.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="button button-primary" id="start-all">Activar workers</button>
+          <button class="button button-secondary" id="refresh-market">Actualizar mercado</button>
+        </div>
+      </section>
+
+      <section class="metrics-grid" aria-label="Metricas de la granja">
+        <article class="metric-card primary-card">
+          <span>HASH RATE TOTAL</span>
+          <strong id="total-hashrate">0.00 kH/s</strong>
+          <small id="hashrate-detail">0 workers activos</small>
+        </article>
+        <article class="metric-card">
+          <span>PRECIO VRSC</span>
+          <strong id="vrsc-price">--</strong>
+          <small id="price-change">Consultando mercado...</small>
+        </article>
+        <article class="metric-card">
+          <span>ESTIMACION DIARIA</span>
+          <strong id="daily-usd">$0.00</strong>
+          <small><span id="daily-vrsc">0.0000</span> VRSC / dia</small>
+        </article>
+        <article class="metric-card">
+          <span>SHARES ACEPTADOS</span>
+          <strong id="total-shares">0</strong>
+          <small id="rejected-shares">0 rechazadas</small>
+        </article>
+      </section>
+
+      <section class="farm-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">WORKERS</p>
+            <h2>Granja conectada</h2>
+          </div>
+          <button class="text-button" id="add-worker">+ Agregar worker demo</button>
+        </div>
+        <div class="workers" id="workers"></div>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">RENDIMIENTO</p>
+              <h2>Ultimas 24 horas</h2>
+            </div>
+            <span class="chart-legend"><i></i> Hash rate</span>
+          </div>
+          <div class="chart" id="chart" aria-label="Grafica simulada de hash rate"></div>
+          <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Ahora</span></div>
+        </article>
+        <article class="panel activity-panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">EVENTOS</p>
+              <h2>Actividad reciente</h2>
+            </div>
+          </div>
+          <div class="activity" id="activity"></div>
+        </article>
+      </section>
+
+      <section class="api-banner">
+        <div>
+          <p class="eyebrow">SIGUIENTE PASO</p>
+          <h2>Conecta la granja real</h2>
+          <p>La web esta preparada para consumir <code>/api/farm/status</code>. La app Android y cada rig enviaran sus metricas a ese backend con una clave de equipo.</p>
+        </div>
+        <span class="api-status">API pendiente</span>
+      </section>
+    </main>
+    <footer>Verus Farm Console · Dashboard de monitorizacion · No ejecuta mineria en el navegador</footer>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
