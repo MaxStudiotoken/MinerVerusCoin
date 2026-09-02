@@ -460,6 +460,23 @@ private fun PerformanceCard(uiState: MinerUiState) {
             left = MetricSpec("Ultima share", uiState.lastShareAt),
             right = MetricSpec("Rendimiento", "${uiState.cpuLoadPercent}%")
         )
+        MetricRow(
+            left = MetricSpec(
+                "Bateria",
+                uiState.batteryLevel?.let { "$it%" } ?: "--"
+            ),
+            right = MetricSpec(
+                "Temperatura",
+                uiState.batteryTemperatureC?.let {
+                    String.format(Locale.US, "%.1f C", it)
+                } ?: "--"
+            )
+        )
+        Text(
+            text = uiState.safetyLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
     }
 }
 

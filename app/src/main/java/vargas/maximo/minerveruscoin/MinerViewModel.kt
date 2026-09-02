@@ -1,7 +1,10 @@
 package vargas.maximo.minerveruscoin
 
 import android.app.Application
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.os.BatteryManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import java.text.SimpleDateFormat
@@ -45,6 +48,10 @@ data class MinerUiState(
     val farmApiKey: String = "",
     val farmSyncLabel: String = "Farm API sin configurar",
     val engineStatus: String = "Comprobando motor nativo",
+    val batteryLevel: Int? = null,
+    val batteryTemperatureC: Double? = null,
+    val isCharging: Boolean = false,
+    val safetyLabel: String = "Comprobando proteccion del dispositivo",
     val priceData: PriceData? = null,
     val logs: List<String> = emptyList()
 )
@@ -72,6 +79,7 @@ class MinerViewModel @JvmOverloads constructor(
     init {
         restoreConfiguration()
         _uiState.update { it.copy(engineStatus = NativeVerusEngine.status) }
+        refreshDeviceHealth()
         addLog("Panel VRSC cargado.")
         addLog("Mercado en tiempo real disponible.")
         refreshData(showUserLog = false)
@@ -167,6 +175,14 @@ class MinerViewModel @JvmOverloads constructor(
     }
 
     private fun startMining() {
+        val deviceHealth = readDeviceHealth()
+        applyDeviceHealth(deviceHealth)
+        if (!deviceHealth.isSafeForMining) {
+            _uiState.update { it.copy(statusLabel = deviceHealth.safetyLabel) }
+            addLog("Inicio bloqueado: ${deviceHealth.safetyLabel}")
+            return
+        }
+
         val snapshot = _uiState.value
         val wallet = snapshot.minerAddress.trim()
         val pool = snapshot.poolAddress.trim()
@@ -229,6 +245,13 @@ class MinerViewModel @JvmOverloads constructor(
     private fun tickMining() {
         val snapshot = _uiState.value
         if (!snapshot.isMining) {
+            return
+        }
+
+        val deviceHealth = readDeviceHealth()
+        applyDeviceHealth(deviceHealth)
+        if (!deviceHealth.isSafeForMining) {
+            stopMining(deviceHealth.safetyLabel)
             return
         }
 
@@ -297,17 +320,17 @@ class MinerViewModel @JvmOverloads constructor(
         syncFarmTelemetry()
     }
 
-    private fun stopMining() {
+    private fun stopMining(reason: String? = null) {
         miningJob?.cancel()
         miningJob = null
         _uiState.update {
             it.copy(
                 isMining = false,
-                statusLabel = "Sesion detenida",
+                statusLabel = reason ?: "Sesion detenida",
                 hashRate = 0.0
             )
         }
-        addLog("Mineria detenida.")
+        addLog(reason ?: "Mineria detenida.")
         syncFarmTelemetry(force = true)
     }
 
@@ -332,6 +355,45 @@ class MinerViewModel @JvmOverloads constructor(
                 farmApiUrl = preferences.getString(PREF_FARM_API_URL, "").orEmpty()
             )
         }
+    }
+
+    private fun refreshDeviceHealth() {
+        applyDeviceHealth(readDeviceHealth())
+    }
+
+    private fun applyDeviceHealth(deviceHealth: DeviceHealth) {
+        _uiState.update {
+            it.copy(
+                batteryLevel = deviceHealth.batteryLevel,
+                batteryTemperatureC = deviceHealth.temperatureC,
+                isCharging = deviceHealth.isCharging,
+                safetyLabel = deviceHealth.safetyLabel
+            )
+        }
+    }
+
+    private fun readDeviceHealth(): DeviceHealth {
+        val application = getApplication<Application>()
+        val batteryIntent = application.registerReceiver(
+            null,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
+        val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+        val batteryLevel = if (level >= 0 && scale > 0) level * 100 / scale else null
+        val temperature = batteryIntent
+            ?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
+            ?.takeIf { it > 0 }
+            ?.div(10.0)
+        val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+            status == BatteryManager.BATTERY_STATUS_FULL
+
+        return DeviceHealth(
+            batteryLevel = batteryLevel,
+            temperatureC = temperature,
+            isCharging = isCharging
+        )
     }
 
     private fun syncFarmTelemetry(force: Boolean = false) {
@@ -413,11 +475,39 @@ class MinerViewModel @JvmOverloads constructor(
         const val MIN_CPU_LOAD = 25
         const val MAX_CPU_LOAD = 100
         const val FARM_SYNC_INTERVAL_MS = 15_000L
+        const val MAX_DEVICE_TEMPERATURE_C = 42.0
+        const val MIN_BATTERY_PERCENT = 15
         const val PREFERENCES_NAME = "verus_miner_preferences"
         const val PREF_POOL_ADDRESS = "pool_address"
         const val PREF_MINER_ADDRESS = "miner_address"
         const val PREF_WORKER_NAME = "worker_name"
         const val PREF_CPU_LOAD = "cpu_load"
         const val PREF_FARM_API_URL = "farm_api_url"
+    }
+}
+
+private data class DeviceHealth(
+    val batteryLevel: Int?,
+    val temperatureC: Double?,
+    val isCharging: Boolean
+) {
+    val isSafeForMining: Boolean
+        get() = (temperatureC == null || temperatureC < MAX_DEVICE_TEMPERATURE_C) &&
+            (batteryLevel == null || batteryLevel >= MIN_BATTERY_PERCENT || isCharging)
+
+    val safetyLabel: String
+        get() = when {
+            temperatureC != null && temperatureC >= MAX_DEVICE_TEMPERATURE_C ->
+                "Proteccion termica: ${temperatureC.formatTemperature()} C"
+            batteryLevel != null && batteryLevel < MIN_BATTERY_PERCENT && !isCharging ->
+                "Proteccion de bateria: ${batteryLevel}% sin carga"
+            else -> "Proteccion activa"
+        }
+
+    private fun Double.formatTemperature(): String = String.format(Locale.US, "%.1f", this)
+
+    private companion object {
+        const val MAX_DEVICE_TEMPERATURE_C = 42.0
+        const val MIN_BATTERY_PERCENT = 15
     }
 }
